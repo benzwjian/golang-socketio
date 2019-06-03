@@ -2,14 +2,15 @@ package transport
 
 import (
 	"errors"
-	"github.com/gorilla/websocket"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
-	upgradeFailed     = "Upgrade failed: "
+	upgradeFailed = "Upgrade failed: "
 
 	WsDefaultPingInterval   = 30 * time.Second
 	WsDefaultPingTimeout    = 60 * time.Second
@@ -27,13 +28,13 @@ var (
 )
 
 type WebsocketConnection struct {
-	socket    *websocket.Conn
+	Socket    *websocket.Conn
 	transport *WebsocketTransport
 }
 
 func (wsc *WebsocketConnection) GetMessage() (message string, err error) {
-	wsc.socket.SetReadDeadline(time.Now().Add(wsc.transport.ReceiveTimeout))
-	msgType, reader, err := wsc.socket.NextReader()
+	wsc.Socket.SetReadDeadline(time.Now().Add(wsc.transport.ReceiveTimeout))
+	msgType, reader, err := wsc.Socket.NextReader()
 	if err != nil {
 		return "", err
 	}
@@ -58,8 +59,8 @@ func (wsc *WebsocketConnection) GetMessage() (message string, err error) {
 }
 
 func (wsc *WebsocketConnection) WriteMessage(message string) error {
-	wsc.socket.SetWriteDeadline(time.Now().Add(wsc.transport.SendTimeout))
-	writer, err := wsc.socket.NextWriter(websocket.TextMessage)
+	wsc.Socket.SetWriteDeadline(time.Now().Add(wsc.transport.SendTimeout))
+	writer, err := wsc.Socket.NextWriter(websocket.TextMessage)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func (wsc *WebsocketConnection) WriteMessage(message string) error {
 }
 
 func (wsc *WebsocketConnection) Close() {
-	wsc.socket.Close()
+	wsc.Socket.Close()
 }
 
 func (wsc *WebsocketConnection) PingParams() (interval, timeout time.Duration) {
@@ -92,14 +93,14 @@ type WebsocketTransport struct {
 	RequestHeader http.Header
 }
 
-func (wst *WebsocketTransport) Connect(url string) (conn Connection, err error) {
+func (wst *WebsocketTransport) Connect(url string) (conn Connection, socket *websocket.Conn, resp *http.Response, err error) {
 	dialer := websocket.Dialer{}
-	socket, _, err := dialer.Dial(url, wst.RequestHeader)
+	socket, resp, err = dialer.Dial(url, wst.RequestHeader)
 	if err != nil {
-		return nil, err
+		return nil, nil, resp, err
 	}
 
-	return &WebsocketConnection{socket, wst}, nil
+	return &WebsocketConnection{socket, wst}, socket, resp, nil
 }
 
 func (wst *WebsocketTransport) HandleConnection(

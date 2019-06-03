@@ -3,6 +3,8 @@ package transport
 import (
 	"net/http"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 /**
@@ -37,7 +39,7 @@ type Transport interface {
 	/**
 	Get client connection
 	*/
-	Connect(url string) (conn Connection, err error)
+	Connect(url string) (conn Connection, socket *websocket.Conn, resp *http.Response, err error)
 
 	/**
 	Handle one server connection
