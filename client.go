@@ -1,14 +1,14 @@
 package gosocketio
 
 import (
-	"github.com/graarh/golang-socketio/transport"
+	"github.com/benzwjian/golang-socketio/transport"
 	"strconv"
 )
 
 const (
 	webSocketProtocol = "ws://"
 	webSocketSecureProtocol = "wss://"
-	socketioUrl       = "/socket.io/?EIO=3&transport=websocket"
+	socketioUrl       = "/hello/socket.io/?EIO=3&transport=websocket"
 )
 
 /**
